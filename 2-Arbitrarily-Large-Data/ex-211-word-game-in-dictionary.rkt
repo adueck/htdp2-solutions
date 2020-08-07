@@ -1,0 +1,93 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname ex-211-word-game-in-dictionary) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/batch-io)
+(define LOCATION "words")
+
+; A Dictionary is a List-of-strings.
+(define DICTIONARY (read-lines LOCATION))
+
+; A Word is one of:
+; – '() or
+; – (cons 1String Word)
+; interpretation a Word is a list of 1Strings (letters)
+ 
+; A List-of-words is on of:
+; - '() or
+; - (cons Word List-of-words)
+
+; String -> List-of-strings
+; finds all words that the letters of some given word spell
+(check-member-of (alternative-words "cat")
+                 (list "act" "cat")
+                 (list "cat" "act"))
+(check-satisfied (alternative-words "rat")
+                 all-words-from-rat?)
+(define (alternative-words s)
+  (in-dictionary
+    (words->strings (arrangements (string->word s)))))
+ 
+; Word -> List-of-words
+; finds all rearrangements of word
+(define (arrangements word)
+  (list word))
+
+; String -> Word
+; converts s to the chosen word representation
+(check-expect (string->word "") '())
+(check-expect (string->word "cat")
+              (list "c" "a" "t"))
+(define (string->word s)
+  (explode s))
+ 
+; Word -> String
+; converts w to a string
+(check-expect (word->string '()) "")
+(check-expect (word->string (list "c" "a" "t"))
+              "cat")
+(define (word->string w)
+  (implode w))
+
+; List-of-strings -> Boolean
+(define (all-words-from-rat? w)
+  (and
+    (member? "rat" w) (member? "art" w) (member? "tar" w)))
+  
+; List-of-words -> List-of-strings
+; turns all Words in low into Strings
+(check-expect (words->strings '()) '())
+(check-expect (words->strings (list
+                              (list "c" "a" "t")
+                              (list "b" "e" "a" "r")))
+              (list "cat" "bear"))
+(define (words->strings low)
+  (cond
+    [(empty? low) '()]
+    [else (cons
+           (word->string (first low))
+           (words->strings (rest low)))]))
+ 
+; List-of-strings -> List-of-strings
+; picks out all those Strings that occur in the dictionary
+(check-expect (in-dictionary '()) '())
+(check-expect (in-dictionary (list "cat" "bear" "cgxbljrcjkm"))
+              (list "cat" "bear"))
+(define (in-dictionary los)
+  (cond
+    [(empty? los) '()]
+    [else (if (exists-in-dict? (first los) DICTIONARY)
+              (cons (first los) (in-dictionary (rest los)))
+              (in-dictionary (rest los)))]))
+
+; String Dictionary -> Boolean
+; tells if an existing word (as a string) exists in the Dictionary
+(check-expect (exists-in-dict? "apple" (list "apple" "car"))
+              #true)
+(check-expect (exists-in-dict? "bkorceauh" (list "bear" "table"))
+              #false)
+(define (exists-in-dict? s dict)
+  (cond
+    [(empty? dict) #f]
+    [else (or
+           (string=? (first dict) s)
+           (exists-in-dict? s (rest dict)))]))
