@@ -26,12 +26,13 @@
      (define (make-row n w)
        (local
          ((define pos n)
-          (define (draw-row i)
+          (define (fill-num i p) (if (= i p) 1 0)) 
+          (define (build-row i)
             (cond
-              [(= i 0) '()]
-              [else (cons (if (= i pos) 1 0)
-                          (draw-row (sub1 i)))])))
-         (draw-row w)))
+              [(= (sub1 i) 0) (cons (fill-num i pos) '())]
+              [else (cons (fill-num i pos)
+                          (build-row (sub1 i)))])))
+         (build-row w)))
      (define (build-square n)
        (cond
          [(= n 0) '()]
