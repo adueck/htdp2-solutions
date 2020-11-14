@@ -24,6 +24,7 @@
   (foldl add-prefix-set '() lo1s)))
 
 ; returns the last item in a list
+; [X] [List-of X] -> X
 (check-expect (last (list 2 4 5 6)) 6)
 (check-expect (last '()) '())
 (define (last li)
