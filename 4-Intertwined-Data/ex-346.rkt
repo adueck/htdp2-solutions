@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-advanced-reader.ss" "lang")((modname ex-345) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
+#reader(lib "htdp-advanced-reader.ss" "lang")((modname ex-346) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
 ; an Add is a structure
 ;  (make-add N N)
 (define-struct add [left right])
@@ -22,3 +22,5 @@
 (+ -1 2)
 (+ (* -2 -3) 33)
 (* (+ 1 (* 2 3)) 3.14)
+
+; a BSL-Value is a Number
