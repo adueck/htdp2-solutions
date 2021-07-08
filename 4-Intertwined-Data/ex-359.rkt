@@ -28,10 +28,6 @@
 ;; A Fun is a structure
 ;;   (make-fun Symbol BSL-fun-expr)
 (make-fun 'k (make-add 1 1))
-;(* 5 (make-fun 'k (+ 1 1)))
-;(* (make-fun 'i 5)
-;          (make-fun 'k
-;                    (+ 1 1)))
 
 (define-struct BSL-fun-def [name param body])
 ;; A BSL-fun-def is a structure
