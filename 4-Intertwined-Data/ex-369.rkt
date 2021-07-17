@@ -2,82 +2,32 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname ex-369) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
 ; An Attribute is a list of two items:
-;   (const Symbol (cons String '()))
+;   (cons Symbol (cons String '()))
 (define a0 '((initial "X")))
 
-; An Xexpr.v2 is a list
+; An Xexpr is a list
 ; - (cons Symbol XInfo)
-; where XInfo is
-; - (cons Body)
+
+; An XInfo is one of the following
+; - Body
 ; - (cons [List-of Attribute] Body)
 ; where Body is one of
 ; - '()
-; - '(cons Xexpr.v2 '())
-; <machine />
+; - (cons Xexpr.v2 '())
+ 
 (define e0 '(machine))
-; <machine initial="X" />
 (define e1 `(machine ,a0))
-; <machine><action /><machine>
 (define e2 '(machine (action)))
-; <machine><action /><machine>
 (define e3 '(machine () (action)))
-; <machine initial="X"><action /><action /></machine>
 (define e4 `(machine ,a0 (action) (action)))
-; <single />
 (define e5 '(single))
-; <parent><child /></parent>
 (define e6 '(parent (child)))
-;<parent><child eyes="blue" /></parent>
 (define e7 '(parent (child ((eyes "blue")))))
-; <parent eyes="brown">
-;  <child eyes="blue">
-;   <grandchild />
-;  </child>
-; </parent>
 (define e8 '(parent ((eyes "brown"))
-                    (child (eyes "blue")
+                    (child ((eyes "blue"))
                            (grandchild))))
 
-; [List-of Attribute] Symbol -> String or #false
-; If loa associates s with a string, the function retrieves
-; this string; otherwise it returns #false.
-(check-expect (find-attr '() 'x) #false)
-(check-expect (find-attr '((name "Bill")
-                           (age "73"))
-                         'age)
-              "73")
-(define (find-attr loa s)
-  (local ((define mtch (assq s loa)))
-    (cond
-      [(boolean? mtch) #false]
-      [else (second mtch)])))
-
-; Xexpr.v2 -> Symbol
-; returns the name of an xe
-(check-expect (xexpr-name e5) 'single)
-(check-expect (xexpr-name e7) 'parent)
-(check-expect (xexpr-name e1) 'machine)
-(define (xexpr-name xe)
-  (first xe))
-
-; Xexpr.v2 -> [List-of Xexpr.v2]
-; returns the content of an xe
-(check-expect (exexpr-content e0) '())
-(check-expect (exexpr-content e1) '())
-(check-expect (exexpr-content e2) '((action)))
-(check-expect (exexpr-content e3) '((action)))
-(check-expect (exexpr-content e4) '((action) (action)))
-(check-expect (exexpr-content e5) '())
-(check-expect (exexpr-content e6) '((child)))
-(check-expect (exexpr-content e7) '((child ((eyes "blue")))))
-(define (exexpr-content xe)
-  (local ((define xinfo (rest xe)))
-    (cond
-      [(empty? xinfo) '()]
-      [(list-of-attributes? (first xinfo)) (rest xinfo)]
-      [else (list (first xinfo))])))
-
-; Xexpr.v2 -> [List-of Attribute]
+; Xexpr -> [List-of Attribute]
 ; retrieves the list of attributes of xe
 (check-expect (xexpr-attr e0) '())
 (check-expect (xexpr-attr e1) '((initial "X")))
@@ -87,27 +37,99 @@
 (check-expect (xexpr-attr e5) '())
 (check-expect (xexpr-attr e8) '((eyes "brown")))
 (define (xexpr-attr xe)
-  (local ((define xinfo (rest xe)))
+  (local ((define x-info (rest xe)))
     (cond
-      [(empty? xinfo) '()]
-      [else (local ((define loa-or-x
-                      (first xinfo)))
-              (if (list-of-attributes? loa-or-x)
-                  loa-or-x
-                  '()))])))
+      [(empty? x-info) '()]
+      [else (if
+             (list-of-attributes? (first x-info))
+             (first x-info)
+             '())])))
 
-; A Attributes/Xexpr is one of the following
+; A LOA-or-X is one of the following
 ; - [List-of Attribute]
-; - Xexpr.v2
-; Attributes/Xexpr -> Boolean
+; - Xexpr
+
+; LOA-or-X -> boolean
 ; determines whether x is an element of [List-of Attribute]
 ; #false otherwise
-(check-expect (list-of-attributes? '()) #t)
-(check-expect (list-of-attributes? '((eyes "brown"))) #t)
-(check-expect (list-of-attributes? '(child)) #f)
+(check-expect (list-of-attributes? '(('color "red")))
+              #true)
+(check-expect (list-of-attributes? '(machine stand))
+              #false)
 (define (list-of-attributes? x)
   (cond
     [(empty? x) #true]
-    [(cons? (first x)) #true]
-    ; can't be a list of attributes because it starts with a symbol
-    [(symbol? (first x)) #false]))
+    [else (local
+            ((define neloa-or-x (first x)))
+            (cons? neloa-or-x))]))
+
+; Xexpr -> Symbol
+; returns the name of an Xexpr
+(check-expect (xexpr-name e0) 'machine)
+(check-expect (xexpr-name e2) 'machine)
+(check-expect (xexpr-name e8) 'parent)
+(define (xexpr-name x)
+  (first x))
+
+; Xexpr -> [List-of Xexpr]
+; returns the content of an Xexpr
+(check-expect (xexpr-content e0) '())
+(check-expect (xexpr-content e1) '())
+(check-expect (xexpr-content e2) '((action)))
+(check-expect (xexpr-content e3) '((action)))
+(check-expect (xexpr-content e4) '((action) (action)))
+(check-expect (xexpr-content e5) '())
+(check-expect (xexpr-content e6) '((child)))
+(check-expect (xexpr-content e7) '((child ((eyes "blue")))))
+(check-expect (xexpr-content e8) '((child ((eyes "blue"))
+                                           (grandchild))))
+(define (xexpr-content x)
+  (local
+    ((define x-info (rest x)))
+    (cond
+      [(empty? x-info) '()]
+      [else
+       (if (list-of-attributes? (first x-info))
+           (rest x-info)
+           x-info)])))
+
+; [List-of Attributes] Symbol -> 'Symbol or #false
+; If the attributes list associates the symbol with a string,
+; the function retrieves this string; otherwise it returns #false
+(check-expect (find-attr
+               '((name "bob") (age "23"))
+               'name)
+              "bob")
+(check-expect (find-attr
+               '((name "bob") (age "23"))
+               'naam)
+              #false)
+(check-expect (find-attr
+               '()
+               'name)
+              #false)
+(define (find-attr loa s)
+  (local
+    ((define res (assq s loa)))
+    (cond
+      [(false? res) #false]
+      [else (second res)])))
+
+; Bonus I just made
+; Xexpr -> [List-of Attributes]
+; Returns a list of ALL the attributes in a given Xexpr and it's children
+(check-expect (all-attr e6) '())
+(check-expect (all-attr e7) '((eyes "blue")))
+(check-expect (all-attr e8) '((eyes "blue")
+                              (eyes "brown")))
+(define (all-attr x)
+  (local
+    ((define init (xexpr-attr x))
+     (define lox (xexpr-content x)))
+  (foldl
+   (lambda (x attrs)
+     (append (all-attr x) attrs))
+   init
+   lox)))
+  
+

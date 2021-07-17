@@ -21,30 +21,30 @@
 '(machine (part (inner)) (part))
 
 ; An Attribute is a list of two items:
-;   (const Symbol (cons String '()))
-; An Attribute* is one of
-; - '()
-; - (cons Attribute Attribute*)
+;   (cons Symbol (cons String '()))
 
 ; An Xexpr.v2 is a list
 ; - (cons Symbol XInfo)
-; where XInfo is
+
+; An XInfo is one of the following
 ; - (cons Body)
 ; - (cons [List-of Attribute] Body)
 ; where Body is one of
 ; - '()
-; - '(cons Xexpr.v2 '())
-'(single)
-'(parent (child))
-'(parent (child (eyes "blue")))
-'(parent (eyes "brown")
-         (child (eyes "blue")
-                (grandchild)))
+; - (cons Xexpr.v2 '())
+
+(define x1 '(single))
+(define x2 '(parent (child)))
+(define x3 '(parent (child ((eyes "blue")))))
+(define x4 '(parent ((eyes "brown"))
+                    (child ((eyes "blue"))
+                           (grandchild))))
 
 ; <transition from="seen-e" to="seen-f" />
-'(transition ((from "seen-e") (to "seen-f")))
+'(transition (('from "seen-e") ('to "seen-f")))
+
 ; <ul><li><word /><word /></li><li><word /></li></ul>
-'(ul
-  (li (word) (word))
-  (li (word)))
-; This one could also be represented by Xexpr.v1
+'(ul (li (word) (word))
+     (li (word)))
+
+; The second one could be represented by Xexpr.v1

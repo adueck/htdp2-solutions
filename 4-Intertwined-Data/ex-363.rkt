@@ -21,19 +21,21 @@
 '(machine (part (inner)) (part))
 
 ; An Attribute is a list of two items:
-;   (const Symbol (cons String '()))
+;   (cons Symbol (cons String '()))
 
 ; An Xexpr.v2 is a list
 ; - (cons Symbol XInfo)
-; where XInfo is
+
+; An XInfo is one of the following
 ; - (cons Body)
 ; - (cons [List-of Attribute] Body)
 ; where Body is one of
 ; - '()
-; - '(cons Xexpr.v2 '())
+; - (cons Xexpr.v2 '())
+
 '(single)
 '(parent (child))
-'(parent (child (eyes "blue")))
-'(parent (eyes "brown")
-         (child (eyes "blue")
+'(parent (child ((eyes "blue"))))
+'(parent ((eyes "brown"))
+         (child ((eyes "blue"))
                 (grandchild)))
