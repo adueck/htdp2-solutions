@@ -13,7 +13,7 @@
 ; - (cons [List-of Attribute] Body)
 ; where Body is one of
 ; - '()
-; - (cons Xexpr.v2 '())
+; - (cons Xexpr Body)
  
 (define e0 '(machine))
 (define e1 `(machine ,a0))

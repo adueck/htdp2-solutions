@@ -31,7 +31,7 @@
 ; - (cons [List-of Attribute] Body)
 ; where Body is one of
 ; - '()
-; - (cons Xexpr.v2 '())
+; - (cons Xexpr.v2 Body)
 
 '(single)
 '(parent (child))
