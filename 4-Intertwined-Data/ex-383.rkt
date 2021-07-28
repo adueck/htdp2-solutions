@@ -4,74 +4,82 @@
 (require 2htdp/universe)
 (require 2htdp/image)
 ; An FSM is a [List-of 1Transition]
-; A 1Transition is a list of two items:
-;   (cons FSM-State (cons FSM-State '()))
+; A 1Transition is a list of three items:
+;   (cons FSM-State (cons FSM-State (cons KeyEvent '())))
 ; An FSM-State is a String that specifies a color
 ; A KeyEvent is a string that specifies the keystroke needed to make
 ; the transition happen
 
 ; An XMachine is a nested list of this shape:
-;   (list 'machine (list (list initial FSM-State))  [List-of X1T]))
+;   (cons 'machine (cons `((initial ,FSM-State))  [List-of X1T]))
 ; An X1T is a nested list of this shape:
-;   ('action (list (list state FSM-State) (list next FSM-State)))
-; using cons
-; An XMachine is a nested list of this shape:
-;   (cons 'machine
-;     (cons
-;       (cons (cons initial (cons FSM-State '())) '())
-;       XIT*))
-; An X1T is a nested list of this shape:
-;(cons 'action
-;        (cons
-;         (cons (cons state (cons FSM-State '()))
-;               (cons (cons next (cons FSM-State '())) '()))
-;         '()))
-; AN XIT* is one of the following
-; - '()
-; - (cons XIT XIT*)
+;   `(action ((state ,FSM-State) (next ,FSM-State) (keystroke ,KeyEvent)))
+
 
 ; data examples 
 (define fsm-traffic
-  '(("red" "green") ("green" "yellow") ("yellow" "red")))
+  '(("red" "green" "g") ("green" "yellow" "y") ("yellow" "red" "r")))
 (define fsm-bw
-  '(("white" "black") ("black" "white")))
+  '(("white" "black" "b") ("black" "white" "w")))
 
 ;<machine initial="red">
-;  <action state="red"    next="green" />
-;  <action state="green"  next="yellow" />
-;  <action state="yellow" next="red" />
+;  <action state="red"    next="green" keystroke="g" />
+;  <action state="green"  next="yellow" keystroke="y" />
+;  <action state="yellow" next="red" keystroke="r" />
 ;</machine>
 
 (define xm0
   '(machine ((initial "red"))
-     (action ((state "red") (next "green")))
-     (action ((state "green") (next "yellow")))
-     (action ((state "yellow") (next "red")))))
+     (action ((state "red") (next "green") (keystroke "g")))
+     (action ((state "green") (next "yellow") (keystroke "y")))
+     (action ((state "yellow") (next "red") (keystroke "r")))))
 
 ; <machine initial="white">
-;   <action state="white" next="black" />
-;   <action state="black" next="white" />
+;   <action state="white" next="black" keystroke="b" />
+;   <action state="black" next="white" keystroke="w" />
 ; </machine>
 
 (define xmbw
   '(machine ((initial "white"))
-            (action ((state "white") (next "black")))
-            (action ((state "black") (next "white")))))
+            (action ((state "white") (next "black") (keystroke "b")))
+            (action ((state "black") (next "white") (keystroke "w")))))
+
+(define xmrg
+  '(machine ((initial "red"))
+            (action ((state "red") (next "green") (keystroke "r")))
+            (action ((state "green") (next "red") (keystroke "r")))))
 
 ; XMachine -> FSM-State
 ; simulates an FSM via the given configuration 
-;(define (simulate-xmachine xm)
-;  (simulate ... ...))
+(define (simulate-xmachine xm)
+  (simulate (xm-state0 xm) (xm->transitions xm)))
 
 ; XMachine -> FSM-State
+; extracts the initial state from the given XMachine:
 (check-expect (xm-state0 xm0) "red")
 (check-expect (xm-state0 xmbw) "white")
-(define (xm-state0 xm) "")
+(check-error (xm-state0 '(machine (action (action)))))
+(define (xm-state0 xm)
+  (local
+    ((define loa (xexpr-attr xm))
+     (define state (find-attr loa 'initial)))
+    (if (boolean? state)
+        (error "invalid XMachine")
+        state)))
 
 ; XMachine -> FSM
+; translates the embedded list of X1Ts into a list of 1Transitions:
 (check-expect (xm->transitions xm0) fsm-traffic)
 (check-expect (xm->transitions xmbw) fsm-bw)
-(define (xm->transitions xm) '())
+(define (xm->transitions xm)
+  (local ((define actions (xexpr-content xm))
+          ; XExpr -> 1Transition
+          (define (act->trans a)
+            (list
+             (find-attr (xexpr-attr a) 'state)
+             (find-attr (xexpr-attr a) 'next)
+             (find-attr (xexpr-attr a) 'keystroke))))
+    (map act->trans actions)))
 
 ; FSM FSM-State -> FSM-State 
 ; matches the keys pressed by a player with the given FSM 
@@ -82,15 +90,16 @@
         (overlay/align/offset
          "middle"
          "top"
-         (text current 14 "black")
+         (text current 14
+               (if (string=? current "black") "white" "black"))
          0 -10
          (square 100 "solid" current)))]
     [on-key
       (lambda (current key-event)
-        ;(local ((define req-key (find-key transitions current)))
-          ;(if (key=? key-event req-key) 
-              (find-next transitions current))]))
-              ;current)))]))
+        (local ((define req-key (find-key transitions current)))
+          (if (key=? key-event req-key) 
+              (find-next transitions current)
+              current)))]))
  
 ; [X Y] [List-of [List X Y ...]] X -> Y
 ; finds the matching Y for the given X in alist
