@@ -20,11 +20,14 @@
 (check-expect (DNAprefix '() dd2) #true)
 (check-expect (DNAprefix (list 't) '()) #false)
 (define (DNAprefix p d)
+  ; the prefix is correct if
   (or
+    ; each molocule in the prefix matches the DNA description 
     (and
      (and (cons? p) (cons? d))
      (and (compare-dnab (first p) (first d))
           (DNAprefix (rest p) (rest d))))
+    ; or, the prefix has length zero
     (empty? p)))
 
 ; DNAB DNAB -> Boolean
@@ -50,4 +53,14 @@
           (DNAdelta (rest p) (rest d))
           ; match unsuccesful or reached end of DD
           #false)))
-    
+
+; I have simplified DNAprefix and DNAdelta as far as possible, as far
+; as I can see. I started designing with the a table based on a cond
+; statement with all possible cases (combinations of input possibilities),
+; then I used the laws of logic to see how I could simplify the logic into
+; the shortest statements/least decisions possible. It's amazing to see how
+; after all those manipulations the problem is essentially boiled down to a
+; simplified version of the solution that can be explained as in English with
+; the comments, but of which I can be confident is 100% logically sound and can
+; cover all the test-cases and presumably anything else that could possibly
+; get thrown at it. The HTDP design process is awesome! 💪
