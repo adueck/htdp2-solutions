@@ -1,8 +1,8 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname ex-404) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
-; [X X -> Boolean] [List-of X] [List-of X] -> Boolean
-; like andmap but for two lists of the same type and equal length
+; [X Y -> Boolean] [List-of X] [List-of Y] -> Boolean
+; like andmap but for two lists of equal length
 (check-expect (andmap2 (lambda (x) (> x 5))
                        '(6 9 10)
                        '(50 87 90))
