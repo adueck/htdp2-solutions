@@ -131,28 +131,22 @@
 
 ; SOE -> Solution
 ; Shows the solution for a given triangulated SOE
+; Using the existing foldr abstraction and lambda, as per the Challenge
 (check-expect (solve (triangulate M)) S)
 (check-expect (solve (list (list 2 4)))
-                     (list 2))
-(define (solve soe)
-  (local ((define (solveS sE lon)
-            (if (empty? sE)
-                '()
-                (local ((define coE (solve-helper (first sE) lon))
-                        (define others (solveS (rest sE) (cons coE lon))))
-                  (cons coE others)))))
-    (reverse (solveS (reverse soe) '()))))
-
-; SOE -> Solution
-; Shows the solution for a given triangulated SOE
-; Using the existing foldr abstraction and lambda, as per the Challenge
-(check-expect (solve-challenge (triangulate M)) S)
-(check-expect (solve-challenge (list (list 2 4)))
               (list 2))
-(define (solve-challenge soe)
+(define (solve soe)
   (foldr (lambda (e los) (cons (solve-helper e los) los))
          '()
          soe))
+
+; SOE -> Solution
+; Shows the solution for a given SOE using the triangulation method
+(check-expect (gauss M) S)
+(check-expect (gauss (list (list 2 4)))
+              (list 2))
+(define (gauss soe)
+  (solve (triangulate soe)))
 
 ; Equation [List-of Number] -> Number
 ; Takes an equation with solutions for the non-leading coefficients
