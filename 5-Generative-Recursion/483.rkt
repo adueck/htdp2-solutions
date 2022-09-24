@@ -8,7 +8,6 @@
 (define SQ (square SIZE "outline" "black"))
 (define Q (circle (* 0.25 SIZE) "solid" "grey"))
 (define Q-WIDTH (image-width Q))
-(define QUEENS 8)
 
 ; Number Boolean -> Image
 ; Draws a picture of a solution to the queens problem
@@ -43,6 +42,17 @@
     (if (boolean? candidate)
         #false
         (board-qps candidate))))
+
+; Board N -> [Maybe [List-of QP]]
+; places n queens on board; otherwise, returns #false
+(define (place-queens a-board n)
+  (cond
+    [(= n 0) a-board]
+    [else (ormap (lambda (open-spot)
+                   (place-queens 
+                    (add-queen a-board open-spot)
+                    (sub1 n)))
+                 (find-open-spots a-board))]))
 
 ; Number -> [[List-of QP] -> Boolean]
 ; Returns a predicate on queen placements that determines
@@ -225,17 +235,6 @@
 (define-struct board [size qps])
 ; A Board is a structure:
 ;  (make-board Number [List-of QP])
-
-; Board N -> [Maybe [List-of QP]]
-; places n queens on board; otherwise, returns #false
-(define (place-queens a-board n)
-  (cond
-    [(= n 0) a-board]
-    [else (ormap (lambda (open-spot)
-                   (place-queens 
-                    (add-queen a-board open-spot)
-                    (sub1 n)))
-                 (find-open-spots a-board))]))
 
 ; N -> Board 
 ; creates the initial n by n board
