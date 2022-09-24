@@ -5,7 +5,8 @@
 (require "extras.rkt")
 
 (define SIZE 40)
-(define SQ (square SIZE "outline" "black"))
+(define SQ (square (sub1 SIZE) "outline" "black"))
+(define SQ-BLACK (square SIZE "solid" "black"))
 (define Q (circle (* 0.25 SIZE) "solid" "grey"))
 (define Q-WIDTH (image-width Q))
 
@@ -121,18 +122,21 @@
 
 ; Number -> Image
 (define (draw-board n)
-  (local ((define ROW (draw-row n))
-          (define (drawB m)
-            (cond
-              [(= m 0) empty-image]
-              [else (above ROW (drawB (sub1 m)))])))
-    (drawB n)))
+  (local
+    ((define (drawB m black)
+       (cond
+         [(= m 0) empty-image]
+         [else (above
+                (draw-row n black)
+                (drawB (sub1 m) (not black)))]))) 
+(drawB n #f)))
 
-; Number -> Image
-(define (draw-row n)
+; Number Boolean -> Image
+(define (draw-row n black)
   (cond
     [(= n 0) empty-image]
-    [else (beside SQ (draw-row (sub1 n)))]))
+    [else (beside (if black SQ-BLACK SQ)
+                  (draw-row (sub1 n) (not black)))]))
 
 ; QP Image Boolean -> Image
 (define (place-on p img show-lines)
