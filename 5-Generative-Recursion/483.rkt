@@ -123,20 +123,18 @@
 ; Number -> Image
 (define (draw-board n)
   (local
-    ((define (drawB m black)
+    ((define (draw-row n black)
+       (cond
+         [(= n 0) empty-image]
+         [else (beside (if black SQ-BLACK SQ)
+                       (draw-row (sub1 n) (not black)))]))
+     (define (drawB m black)
        (cond
          [(= m 0) empty-image]
          [else (above
                 (draw-row n black)
                 (drawB (sub1 m) (not black)))]))) 
 (drawB n #f)))
-
-; Number Boolean -> Image
-(define (draw-row n black)
-  (cond
-    [(= n 0) empty-image]
-    [else (beside (if black SQ-BLACK SQ)
-                  (draw-row (sub1 n) (not black)))]))
 
 ; QP Image Boolean -> Image
 (define (place-on p img show-lines)
