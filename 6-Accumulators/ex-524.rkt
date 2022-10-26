@@ -71,7 +71,9 @@
      (define left (scene-left sc))
      (define right (scene-right sc))
      ; TODO: Could do something less repetive here
-     (define all-moves
+     ; or at least make a list of all-possible-scenes
+     ; and then map the prevs onto them
+     (define all-possible-moves
        (if (string=? (scene-boat sc) "left")
            ; BOAT ON LEFT SIDE
            (append
@@ -182,8 +184,10 @@
                 '())
             ))))
     (filter
+     ; remove any repeated scenes
      (lambda (ps) (not (member (ps-scene ps) (ps-prev ps))))
-     (filter ms-survive? all-moves))))
+     ; remove any scenes where the Ms die
+     (filter ms-survive? all-possible-moves))))
 
 ; PuzzleState -> Boolean
 (check-expect (ms-survive? initial) #t)
@@ -293,6 +297,6 @@
 (define scenes-to-solution (get-scenes solution))
 
 ; To watch a video of the solution
-(run-movie 1 (map render-scene scenes-to-solution))
+; (run-movie 1 (map render-scene scenes-to-solution))
 
 
