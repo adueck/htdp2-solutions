@@ -5,8 +5,8 @@
 ; I didn't do this becuase it took a bunch of math review/catchup
 
 (define CENTER (make-posn 200 200))
-(define RADIUS 200) ; the radius in pixels 
- 
+(define RADIUS 200) ; the radius in pixels
+
 ; Number -> Posn
 ; determines the point on the circle with CENTER 
 ; and RADIUS whose angle is (* factor 360) degrees
